@@ -22,6 +22,9 @@ public class CustomerConverter {
         customer.setTotalInteractions(customerRequestDto.getTotalInteractions());
         customer.setCreditLimit(customerRequestDto.getCreditLimit());
         customer.setNotes(customerRequestDto.getNotes());
+        customer.setCreatedBy(customerRequestDto.getCreatedBy());
+        customer.setUpdatedBy(customerRequestDto.getUpdatedBy());
+        customer.setName(customerRequestDto.getName());
         return customer;
     }
 }

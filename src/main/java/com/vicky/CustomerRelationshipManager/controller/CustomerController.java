@@ -2,6 +2,7 @@ package com.vicky.CustomerRelationshipManager.controller;
 import com.vicky.CustomerRelationshipManager.dto.CustomerRequestDto;
 import com.vicky.CustomerRelationshipManager.model.Customer;
 import com.vicky.CustomerRelationshipManager.service.CustomerService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class CustomerController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity saveCustomer(@RequestBody CustomerRequestDto customerRequestDto){
+    public ResponseEntity saveCustomer(@Valid @RequestBody CustomerRequestDto customerRequestDto){
         Customer customer=customerService.saveCustomer(customerRequestDto);
         return new ResponseEntity<>(customer, HttpStatus.CREATED);
     }

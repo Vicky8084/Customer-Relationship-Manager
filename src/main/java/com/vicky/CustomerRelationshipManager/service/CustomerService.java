@@ -56,7 +56,7 @@ public class CustomerService {
     }
 
     public Customer findCustomerByPhoneNumber(String phoneNumber){
-        Optional<Customer> customerOptional=customerRepository.findByPhone(phoneNumber);
+        Optional<Customer> customerOptional=customerRepository.findByPhoneNumber(phoneNumber);
         if (customerOptional.isEmpty()){
             throw new RuntimeException("Customer Not Found with Phone Number :- "+phoneNumber);
         }

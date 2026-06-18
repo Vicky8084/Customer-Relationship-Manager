@@ -26,14 +26,14 @@ public class CustomerController {
     }
 
     @GetMapping("/getById/{id}")
-    public ResponseEntity getCustomerById(@PathVariable Long id){
-        Customer customer=customerService.getCustomerById(id);
+    public ResponseEntity findCustomerById(@PathVariable Long id){
+        Customer customer=customerService.findCustomerById(id);
         return new ResponseEntity<>(customer,HttpStatus.OK);
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<Customer>> getAllCustomer(){
-        List<Customer> customers = customerService.getAllCustomer();
+    public ResponseEntity<List<Customer>> findAllCustomer(){
+        List<Customer> customers = customerService.findALlCustomer();
         return ResponseEntity.status(HttpStatus.OK).body(customers);
     }
 
@@ -53,4 +53,43 @@ public class CustomerController {
     public ResponseEntity findCustomerByPhoneNumber(@PathVariable String phoneNumber){
         return ResponseEntity.status(HttpStatus.OK).body(customerService.findCustomerByPhoneNumber(phoneNumber));
     }
+
+    @GetMapping("getByEmail/{email}")
+    public ResponseEntity<Customer> findCustomerByEmail(@PathVariable String email){
+        return ResponseEntity.ok().body(customerService.findCustomerByEmail(email));
+    }
+
+    @DeleteMapping("/deleteById/{id}")
+    public ResponseEntity<Customer> deleteCustomerById(@PathVariable long id){
+        customerService.deleteCustomerById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Customer>> searchCustomer(@RequestParam(required = false) String name,
+                                                         @RequestParam(required = false)String phoneNumber,
+                                                         @RequestParam(required = false)String email,
+                                                         @RequestParam(required = false)String occupation){
+        return ResponseEntity.ok().body(customerService.searchCustomer(name,phoneNumber,email,occupation));
+    }
+
+    @DeleteMapping("/deleteByPhone/{phoneNumber}")
+    public ResponseEntity<Customer> deleteByPhoneNumber(String phoneNUmber){
+        customerService.deleteByPhone(phoneNUmber);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/deleteByName/{name}")
+    public ResponseEntity<Customer> deleteByName(String name){
+        customerService.deleteByPhone(name);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/deleteByEmail/{email}")
+    public ResponseEntity<Customer> deleteByEmail(String email){
+        customerService.deleteByPhone(email);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

@@ -26,7 +26,7 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    public Customer getCustomerById(Long id){
+    public Customer findCustomerById(Long id){
         Optional<Customer> customer= customerRepository.findById(id);
         if(customer.isEmpty()){
             throw new RuntimeException("Customer not found with id :- "+id);
@@ -34,16 +34,37 @@ public class CustomerService {
         return customer.get();
     }
 
-    public List<Customer> getAllCustomer(){
+    public List<Customer> findALlCustomer(){
         return customerRepository.findAll();
     }
 
-    public Customer updateCustomerByEmail(String email,CustomerRequestDto customerRequestDto){
+    public Customer findCustomerByEmail(String email){
         Optional<Customer> ExistingCustomer=customerRepository.findByEmail(email);
         if(ExistingCustomer.isEmpty()){
             throw new RuntimeException("Customer not found with Email :- "+email);
         }
-        Customer customer=ExistingCustomer.get();
+        return ExistingCustomer.get();
+    }
+
+    public Customer findCustomerByName( String name){
+        Optional<Customer> customerOptional =customerRepository.findByName(name);
+        if(customerOptional.isEmpty()){
+            throw new RuntimeException("Customer not found with name :- "+name);
+        }
+        Customer customer=customerOptional.get();
+        return customer;
+    }
+
+    public Customer findCustomerByPhoneNumber(String phoneNumber){
+        Optional<Customer> customerOptional=customerRepository.findByPhone(phoneNumber);
+        if (customerOptional.isEmpty()){
+            throw new RuntimeException("Customer Not Found with Phone Number :- "+phoneNumber);
+        }
+        return customerOptional.get();
+    }
+
+    public Customer updateCustomerByEmail(String email,CustomerRequestDto customerRequestDto){
+        Customer customer=findCustomerByEmail(email);
         customer.setOccupation(customerRequestDto.getOccupation());
         customer.setDateOfBirth(customerRequestDto.getDateOfBirth());
         customer.setAddress(customerRequestDto.getAddress());
@@ -64,20 +85,32 @@ public class CustomerService {
         return customerRepository.save(customer);
     }
 
-    public Customer findCustomerByName( String name){
-        Optional<Customer> customerOptional =customerRepository.findByName(name);
-        if(customerOptional.isEmpty()){
-            throw new RuntimeException("Customer not found with name :- "+name);
-        }
-        Customer customer=customerOptional.get();
-        return customer;
+    public void deleteCustomerById(long id){
+        Customer customer=findCustomerById(id);
+        customerRepository.delete(customer);
     }
 
-    public Customer findCustomerByPhoneNumber(String phoneNumber){
-        Optional<Customer> customerOptional=customerRepository.findByPhone(phoneNumber);
-        if (customerOptional.isEmpty()){
-            throw new RuntimeException("Customer Not Found with Phone Number :- "+phoneNumber);
-        }
-        return customerOptional.get();
+    //Flexible search
+    public List<Customer> searchCustomer(String name,String phoneNumber,String email,String occupation){
+        return customerRepository.findByNameContainingAndPhoneNumberContainingAndEmailContainingAndOccupationContaining(name,phoneNumber,email,occupation);
     }
+
+    //deleteByPhone
+    public void deleteByPhone(String phoneNumber){
+        Customer customer=findCustomerByPhoneNumber(phoneNumber);
+        customerRepository.delete(customer);
+    }
+    //deleteByEmail
+    public void deleteByEmail(String email){
+        Customer customer=findCustomerByEmail(email);
+        customerRepository.delete(customer);
+    }
+
+    public void deleteByName(String name){
+        Customer customer=findCustomerByName(name);
+        customerRepository.delete(customer);
+    }
+
+
+
 }

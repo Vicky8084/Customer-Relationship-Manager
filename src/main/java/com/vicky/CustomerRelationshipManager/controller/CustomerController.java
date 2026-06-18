@@ -3,6 +3,7 @@ import com.vicky.CustomerRelationshipManager.dto.CustomerRequestDto;
 import com.vicky.CustomerRelationshipManager.model.Customer;
 import com.vicky.CustomerRelationshipManager.service.CustomerService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/customer")
+@Slf4j
 public class CustomerController {
     private CustomerService customerService;
     @Autowired
@@ -22,7 +24,9 @@ public class CustomerController {
 
     @PostMapping("/save")
     public ResponseEntity saveCustomer(@Valid @RequestBody CustomerRequestDto customerRequestDto){
+        log.info("Received Dto from the User to Save Customer :- "+customerRequestDto);
         Customer customer=customerService.saveCustomer(customerRequestDto);
+        log.info("Customer saved successfully with id: {}", customer.getId());
         return new ResponseEntity<>(customer, HttpStatus.CREATED);
     }
 

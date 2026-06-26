@@ -1,4 +1,4 @@
-package com.vicky.CustomerRelationshipManager.repository;
+package com.vicky.CustomerRelationshipManager.dbRepository;
 
 import com.vicky.CustomerRelationshipManager.model.Notification;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -6,12 +6,12 @@ import com.vicky.CustomerRelationshipManager.model.Product;
 public class ProductConverter {
     public static Product convertProductRequestDtoIntoProduct(ProductRequestDto productRequestDto){
         Product product=new Product();
-        product.setName(productRequestDto.getName());
+        product.setName(productRequestDto.getName().trim());
         product.setPrice(productRequestDto.getPrice());
         product.setQuantity(productRequestDto.getQuantity());
         product.setExpiry(productRequestDto.getExpiry());
-        product.setCompanyName(productRequestDto.getCompanyName());
-        product.setDescription(productRequestDto.getDescription());
+        product.setCompanyName(productRequestDto.getCompanyName().trim());
+        product.setDescription(productRequestDto.getDescription().trim());
         return product;
     }
 }

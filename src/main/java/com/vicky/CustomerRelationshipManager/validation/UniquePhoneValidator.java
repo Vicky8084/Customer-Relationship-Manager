@@ -1,6 +1,6 @@
 package com.vicky.CustomerRelationshipManager.validation;
 
-import com.vicky.CustomerRelationshipManager.repository.CustomerRepository;
+import com.vicky.CustomerRelationshipManager.dbRepository.CustomerRepository;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.beans.factory.annotation.Autowired;

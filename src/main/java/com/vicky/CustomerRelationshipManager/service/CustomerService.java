@@ -1,13 +1,13 @@
 package com.vicky.CustomerRelationshipManager.service;
 import com.vicky.CustomerRelationshipManager.converter.CustomerConverter;
+import com.vicky.CustomerRelationshipManager.document.CustomerDocument;
 import com.vicky.CustomerRelationshipManager.dto.CustomerRequestDto;
+import com.vicky.CustomerRelationshipManager.elasticConverter.CustomerElasticConverter;
+import com.vicky.CustomerRelationshipManager.elasticRepository.CustomerElasticRepository;
 import com.vicky.CustomerRelationshipManager.model.Customer;
-import com.vicky.CustomerRelationshipManager.repository.CustomerRepository;
+import com.vicky.CustomerRelationshipManager.dbRepository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,14 +16,20 @@ import java.util.Optional;
 @Service
 public class CustomerService {
     private final CustomerRepository customerRepository;
+    private final CustomerElasticRepository customerElasticRepository;
     @Autowired
-    public CustomerService(CustomerRepository customerRepository){
+    public CustomerService(CustomerRepository customerRepository,
+                           CustomerElasticRepository customerElasticRepository){
         this.customerRepository=customerRepository;
+        this.customerElasticRepository=customerElasticRepository;
     }
 
     public Customer saveCustomer(CustomerRequestDto customerRequestDto){
-        Customer customer= CustomerConverter.convertCustomerRequestDtoIntoCustomer(customerRequestDto);
-        return customerRepository.save(customer);
+        Customer customer=CustomerConverter.convertCustomerRequestDtoIntoCustomer(customerRequestDto);
+        Customer savedCustomer=customerRepository.save(customer);
+        CustomerDocument customerDocument=CustomerElasticConverter.convertCustomerIntoCustomerDocument(savedCustomer);
+        customerElasticRepository.save(customerDocument);
+        return savedCustomer;
     }
 
     public Customer findCustomerById(Long id){
@@ -51,8 +57,7 @@ public class CustomerService {
         if(customerOptional.isEmpty()){
             throw new RuntimeException("Customer not found with name :- "+name);
         }
-        Customer customer=customerOptional.get();
-        return customer;
+        return customerOptional.get();
     }
 
     public Customer findCustomerByPhoneNumber(String phoneNumber){
@@ -90,11 +95,6 @@ public class CustomerService {
         customerRepository.delete(customer);
     }
 
-    //Flexible search
-    public List<Customer> searchCustomer(String name,String phoneNumber,String email,String occupation){
-        return customerRepository.findByNameContainingAndPhoneNumberContainingAndEmailContainingAndOccupationContaining(name,phoneNumber,email,occupation);
-    }
-
     //deleteByPhone
     public void deleteByPhone(String phoneNumber){
         Customer customer=findCustomerByPhoneNumber(phoneNumber);
@@ -109,6 +109,10 @@ public class CustomerService {
     public void deleteByName(String name){
         Customer customer=findCustomerByName(name);
         customerRepository.delete(customer);
+    }
+
+    public List<CustomerDocument> searchByName(String name){
+        return customerElasticRepository.findByName(name);
     }
 
 

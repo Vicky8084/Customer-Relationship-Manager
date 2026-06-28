@@ -53,4 +53,35 @@ public class CustomerController {
     public ResponseEntity<List<Customer>> findAllCustomer(){
         return ResponseEntity.status(HttpStatus.OK).body(customerService.findAllCustomer());
     }
+
+    @PutMapping("/updateById/{id}")
+    public ResponseEntity<Customer> updateById(@PathVariable Long id, @RequestBody CustomerRequestDto  customerRequestDto){
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.updateById(id,customerRequestDto));
+    }
+
+    @PutMapping("/updateByEmail/{email}")
+    public ResponseEntity<Customer> updateByEmail(@PathVariable String email, @RequestBody CustomerRequestDto customerRequestDto){
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.updateByEmail(email,customerRequestDto));
+    }
+
+    @DeleteMapping("/deleteById/{id}")
+    public ResponseEntity<Customer> deleteById(@PathVariable Long id){
+        customerService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/deleteByEmail/{email}")
+    public ResponseEntity<Customer> deleteByEmail(@PathVariable String email){
+        customerService.deleteByEmail(email);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Customer>> flexibleSearch(@RequestParam(required = false) String name,
+                                                         @RequestParam(required = false) String email,
+                                                         @RequestParam(required = false) String phoneNumber){
+        List<Customer> customerList=customerService.flexibleSearch(name,email,phoneNumber);
+        return ResponseEntity.status(HttpStatus.OK).body(customerList);
+    }
+
 }

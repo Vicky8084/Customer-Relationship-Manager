@@ -11,5 +11,6 @@ import java.util.List;
 public interface CustomerElasticRepository extends ElasticsearchRepository<CustomerDocument,String> {
     List<CustomerDocument> findByName(String name);
     CustomerDocument findByEmail(String email);
+    CustomerDocument findByPhoneNumber(String phoneNumber);
 
 }

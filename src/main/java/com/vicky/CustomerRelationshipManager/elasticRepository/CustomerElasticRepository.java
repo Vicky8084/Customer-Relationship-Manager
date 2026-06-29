@@ -12,5 +12,5 @@ public interface CustomerElasticRepository extends ElasticsearchRepository<Custo
     List<CustomerDocument> findByName(String name);
     CustomerDocument findByEmail(String email);
     CustomerDocument findByPhoneNumber(String phoneNumber);
-
+    List<CustomerDocument> findByOccupation(String occupation);
 }

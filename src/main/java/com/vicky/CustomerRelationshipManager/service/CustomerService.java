@@ -154,32 +154,39 @@ public class CustomerService {
 
 
     public List<Customer> flexibleSearch(String name, String email, String phoneNumber){
-
         HashSet<Long> ids=new HashSet<>();
-
         if(name!=null){
             List<CustomerDocument> customerDocuments=customerElasticRepository.findByName(name);
             for (CustomerDocument customerDocument : customerDocuments){
                 ids.add(Long.parseLong(customerDocument.getId()));
             }
         }
-
         if(email!=null){
             CustomerDocument customerDocument=customerElasticRepository.findByEmail(email);
             ids.add(Long.parseLong(customerDocument.getId()));
         }
-
         if(phoneNumber!=null){
             CustomerDocument customerDocument=customerElasticRepository.findByPhoneNumber(phoneNumber);
             ids.add(Long.parseLong(customerDocument.getId()));
         }
-
         if (ids.isEmpty()){
             return new ArrayList<>();
         }
-
         return customerRepository.findAllById(ids);
+    }
 
+
+
+    public List<Customer> findByOccupation(String occupation){
+        List<CustomerDocument> customerDocumentList=customerElasticRepository.findByOccupation(occupation);
+        if(customerDocumentList.isEmpty()){
+            throw new RuntimeException("Customers not found with Occupation :- "+occupation);
+        }
+        ArrayList<Long> ids=new ArrayList<>();
+        for(CustomerDocument customerDocument : customerDocumentList){
+            ids.add(Long.parseLong(customerDocument.getId()));
+        }
+        return customerRepository.findAllById(ids);
     }
 
 }

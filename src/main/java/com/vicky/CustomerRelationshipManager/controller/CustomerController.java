@@ -84,4 +84,9 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.OK).body(customerList);
     }
 
+    @GetMapping("/getByOccupation/{occupation}")
+    public ResponseEntity<List<Customer>> findByOccupation(@PathVariable String occupation){
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.findByOccupation(occupation.trim()));
+    }
+
 }

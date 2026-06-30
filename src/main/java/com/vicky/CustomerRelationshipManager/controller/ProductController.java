@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -62,6 +63,17 @@ public class ProductController {
         return ResponseEntity.ok(productService.searchProducts
                 (name != null ? name.trim() : null,
                 companyName != null ? companyName.trim() : null));
+    }
+
+    @GetMapping("/searchByExpiry/{day}")
+    public ResponseEntity<List<Product>> searchByExpiry(@PathVariable Long day){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.searchByExpiry(day));
+    }
+
+    @GetMapping("/searchByPriceRange")
+    public ResponseEntity<List<Product>> findByPriceBetween(@RequestParam double minPrice,
+                                                            @RequestParam double maxPrice){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.findByPriceBetween(minPrice,maxPrice));
     }
 
 }

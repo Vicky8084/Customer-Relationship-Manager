@@ -9,6 +9,7 @@ import com.vicky.CustomerRelationshipManager.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -100,6 +101,25 @@ public class ProductService {
             for (Product product : productList){
                 ids.add(product.getId());
             }
+        }
+        return productRepository.findAllById(ids);
+    }
+
+    public List<Product> searchByExpiry(Long day){
+        LocalDate targetDate = LocalDate.now().plusDays(day);
+        List<ProductDocument> productDocuments=productElasticRepository.findByExpiryBefore(targetDate);
+        ArrayList<Long> ids=new ArrayList<>();
+        for(ProductDocument productDocument : productDocuments){
+            ids.add(Long.parseLong(productDocument.getId()));
+        }
+        return productRepository.findAllById(ids);
+    }
+
+    public List<Product> findByPriceBetween(double minPrice, double maxPrice){
+        List<ProductDocument> productDocuments=productElasticRepository.findByPriceBetween(minPrice,maxPrice);
+        ArrayList<Long> ids=new ArrayList<>();
+        for(ProductDocument productDocument : productDocuments){
+            ids.add(Long.parseLong(productDocument.getId()));
         }
         return productRepository.findAllById(ids);
     }

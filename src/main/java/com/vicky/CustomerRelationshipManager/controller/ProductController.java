@@ -2,10 +2,12 @@ package com.vicky.CustomerRelationshipManager.controller;
 import com.vicky.CustomerRelationshipManager.dto.ProductRequestDto;
 import com.vicky.CustomerRelationshipManager.model.Product;
 import com.vicky.CustomerRelationshipManager.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -18,59 +20,48 @@ public class ProductController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<Product> saveProduct(@RequestBody ProductRequestDto productRequestDto){
-        Product product=productService.saveProduct(productRequestDto);
-        return new ResponseEntity(product, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/getByName/{name}")
-    public ResponseEntity<Product> findProductByName(@PathVariable String name){
-        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductByName(name));
-    }
-
-    @GetMapping("/getAll")
-    public ResponseEntity<List<Product>> findAllProduct(){
-        return ResponseEntity.status(HttpStatus.OK).body(productService.findAllProduct());
+    public ResponseEntity<Product> saveProduct(@Valid @RequestBody ProductRequestDto productRequestDto){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.saveProduct(productRequestDto));
     }
 
     @GetMapping("/getById/{id}")
-    public ResponseEntity<Product> findProductById(@PathVariable long id){
-        return ResponseEntity.ok().body(productService.findProductById(id));
+    public ResponseEntity<Product> findById(@PathVariable Long id){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.findById(id));
+    }
+
+    @GetMapping("/getAll")
+    public ResponseEntity<List<Product>> findALl(){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.findAll());
+    }
+
+    @GetMapping("/getByName/{name}")
+    public ResponseEntity<List<Product>> findByName(@PathVariable String name){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.findByName(name.trim()));
     }
 
     @GetMapping("/getByCompanyName/{companyName}")
-    public ResponseEntity<List<Product>> findProductByCompanyName(@PathVariable String companyName){
-        return ResponseEntity.status(HttpStatus.OK).body(productService.findProductByCompanyName(companyName));
+    public ResponseEntity<List<Product>> findByCompanyName(@PathVariable String companyName){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.findByCompanyName(companyName.trim()));
     }
 
     @PutMapping("/updateById/{id}")
-    public ResponseEntity<Product> updateProductById(@PathVariable Long id, @RequestBody ProductRequestDto productRequestDto){
-        return ResponseEntity.ok().body(productService.updateProductById(id,productRequestDto));
+    public ResponseEntity<Product> updateById(@PathVariable Long id, @RequestBody ProductRequestDto productRequestDto){
+        return ResponseEntity.status(HttpStatus.OK).body(productService.updateById(id,productRequestDto));
     }
 
     @DeleteMapping("/deleteById/{id}")
-    public ResponseEntity<Product> deleteProductByid(@PathVariable long id){
-        productService.deleteProductById(id);
+    public ResponseEntity<Product> deleteById(@PathVariable Long id){
+        productService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Product>> searchProduct(@RequestParam(required = false) String name ,
-                                                       @RequestParam(required = false) String companyName,
-                                                       @RequestParam(required = false) Integer minPrice,
-                                                       @RequestParam(required = false) Integer maxPrice ){
-        List<Product> productList=productService.searchProduct(name,companyName,minPrice,maxPrice);
-        return ResponseEntity.ok().body(productList);
+    public ResponseEntity<List<Product>> searchProducts(@RequestParam(required = false) String name,
+                                                        @RequestParam(required = false) String companyName){
+        //return ResponseEntity.status(HttpStatus.OK).body(productService.searchProducts(name.trim(),companyName.trim()));
+        return ResponseEntity.ok(productService.searchProducts
+                (name != null ? name.trim() : null,
+                companyName != null ? companyName.trim() : null));
     }
 
-    @GetMapping("/priceRange/minPrice/{minPrice}/maxPrice/{maxPrice}")
-    public ResponseEntity<List<Product>> searchProductInPriceRange(@PathVariable Integer minPrice,
-                                                                   @PathVariable Integer maxPrice){
-        return ResponseEntity.ok().body(productService.searchProductInPriceRange(minPrice,maxPrice));
-    }
-
-    @PutMapping("/updateByName/{name}")
-    public ResponseEntity<Product> updateProductbyName(@PathVariable String name,@RequestBody ProductRequestDto productRequestDto){
-        return ResponseEntity.ok().body(productService.updateProductByName(name,productRequestDto));
-    }
 }

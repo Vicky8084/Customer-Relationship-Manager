@@ -1,93 +1,107 @@
 package com.vicky.CustomerRelationshipManager.service;
 import com.vicky.CustomerRelationshipManager.converter.ProductConverter;
-import com.vicky.CustomerRelationshipManager.dto.ProductRequestDto;
-import com.vicky.CustomerRelationshipManager.model.Product;
 import com.vicky.CustomerRelationshipManager.dbRepository.ProductRepository;
+import com.vicky.CustomerRelationshipManager.document.ProductDocument;
+import com.vicky.CustomerRelationshipManager.dto.ProductRequestDto;
+import com.vicky.CustomerRelationshipManager.elasticConverter.ProductElasticConvertor;
+import com.vicky.CustomerRelationshipManager.elasticRepository.ProductElasticRepository;
+import com.vicky.CustomerRelationshipManager.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProductService {
     private final ProductRepository productRepository;
+    private final ProductElasticRepository productElasticRepository;
 
     @Autowired
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository,
+                          ProductElasticRepository productElasticRepository) {
         this.productRepository = productRepository;
+        this.productElasticRepository=productElasticRepository;
     }
 
-    public Product saveProduct(ProductRequestDto productRequestDto) {
-        Product product = ProductConverter.convertProductRequestDtoIntoProduct(productRequestDto);
-        return productRepository.save(product);
+    public Product saveProduct(ProductRequestDto productRequestDto){
+        Product product= ProductConverter.convertProductRequestDtoIntoProduct(productRequestDto);
+        Product savedProduct=productRepository.save(product);
+
+        ProductDocument productDocument= ProductElasticConvertor.convertProductIntoProductDocument(savedProduct);
+        productElasticRepository.save(productDocument);
+        return savedProduct;
     }
 
-    public Product findProductByName(String name) {
-        Optional<Product> productOptional = productRepository.findByName(name);
-        if (productOptional.isEmpty()) {
-            throw new RuntimeException("Product is not found with name :- " + name);
+    public Product findById(Long id){
+        Optional<Product> productOptional= productRepository.findById(id);
+        if (productOptional.isEmpty()){
+            throw new RuntimeException("Product not found with ID :- "+id);
         }
         return productOptional.get();
     }
 
-    public Product findProductById(long id) {
-        Optional<Product> productOptional = productRepository.findById(id);
-        if (productOptional.isEmpty()) {
-            throw new RuntimeException("Product not found with id :- " + id);
+    public List<Product> findAll(){
+        Iterable<ProductDocument> productDocuments=productElasticRepository.findAll();
+        ArrayList<Long> ids=new ArrayList<>();
+        for(ProductDocument productDocument : productDocuments){
+            ids.add(Long.parseLong(productDocument.getId()));
         }
-        return productOptional.get();
+        return productRepository.findAllById(ids);
     }
 
-    public List<Product> findAllProduct() {
-        return productRepository.findAll();
-    }
-
-    public List<Product> findProductByCompanyName(String companyName) {
-        List<Product> productList = productRepository.findByCompanyName(companyName);
-        if (productList.isEmpty()) {
-            throw new RuntimeException("Product Not found with Company name :- " + companyName);
+    public List<Product> findByName(String name){
+        List<ProductDocument> productDocuments =productElasticRepository.findByName(name);
+        ArrayList<Long> ids=new ArrayList<>();
+        for(ProductDocument productDocument : productDocuments){
+            ids.add(Long.parseLong(productDocument.getId()));
         }
-        return productList;
+        return productRepository.findAllById(ids);
     }
 
-    public Product updateProductByName(String name,ProductRequestDto productRequestDto){
-        Product product=findProductByName(name);
-        product.setName(productRequestDto.getName());
+    public List<Product> findByCompanyName(String companyName){
+        List<ProductDocument> productDocuments=productElasticRepository.findByCompanyName(companyName);
+        ArrayList<Long> ids=new ArrayList<>();
+        for (ProductDocument productDocument : productDocuments){
+            ids.add(Long.parseLong(productDocument.getId()));
+        }
+        return productRepository.findAllById(ids);
+    }
+
+    public Product updateById(Long id, ProductRequestDto productRequestDto){
+        Product product=findById(id);
+        product.setName(productRequestDto.getName().trim());
         product.setPrice(productRequestDto.getPrice());
         product.setQuantity(productRequestDto.getQuantity());
         product.setExpiry(productRequestDto.getExpiry());
-        product.setCompanyName(productRequestDto.getCompanyName());
-        product.setDescription(productRequestDto.getDescription());
-        return productRepository.save(product);
+        product.setCompanyName(productRequestDto.getCompanyName().trim());
+        product.setDescription(productRequestDto.getDescription().trim());
+        productRepository.save(product);
+        return product;
     }
 
-
-    public Product updateProductById(long id, ProductRequestDto productRequestDto) {
-        Product product = findProductById(id);
-        product.setName(productRequestDto.getName());
-        product.setPrice(productRequestDto.getPrice());
-        product.setQuantity(productRequestDto.getQuantity());
-        product.setExpiry(productRequestDto.getExpiry());
-        product.setCompanyName(productRequestDto.getCompanyName());
-        product.setDescription(productRequestDto.getDescription());
-        return productRepository.save(product);
+    public void deleteById(Long id){
+        Product product=findById(id);
+        productRepository.deleteById(id);
     }
 
-    public void deleteProductById(long id) {
-        Product product = findProductById(id);
-        productRepository.delete(product);
-    }
-
-    //Flexible Search API - Search products using any combination of optional filters (name, category, price range), returns all matching products}
-    public List<Product> searchProduct(String name, String companyName, int minPrice,int maxPrice){
-        return productRepository.findByNameContainingAndCompanyNameContainingAndPriceBetween(name,companyName,minPrice,maxPrice);
-
-    }
-
-    //This one is also a Flexible Search - search product between renge
-    public List<Product> searchProductInPriceRange(int minPrice,int maxPrice){
-        return productRepository.findByPriceBetween(minPrice,maxPrice);
+    public List<Product> searchProducts(String name, String companyName){
+        HashSet<Long> ids=new HashSet<>();
+        if(name!=null){
+            List<Product> productList=findByName(name);
+            for (Product product : productList){
+                ids.add(product.getId());
+            }
+        }
+        if (companyName!=null){
+            List<Product> productList = findByCompanyName(companyName);
+            for (Product product : productList){
+                ids.add(product.getId());
+            }
+        }
+        return productRepository.findAllById(ids);
     }
 }
 
